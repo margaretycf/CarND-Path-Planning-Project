@@ -1,11 +1,11 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
-   
+
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).
 
 ### Goals
-In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
+In this project my goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. The car's localization and sensor fusion data will be provided. There is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
 
 #### The map of the highway is in data/highway_map.txt
 Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
@@ -37,8 +37,7 @@ Here is the data provided from the Simulator to the C++ Program
 
 #### Previous path data given to the Planner
 
-//Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
+//Note: Return the previous list but with processed points removed, can be a nice tool to show how far along the path has processed since last time. 
 
 ["previous_path_x"] The previous list of x points previously given to the simulator
 
@@ -87,54 +86,54 @@ A really helpful resource for doing this project and creating smooth trajectorie
     git checkout e94b6e1
     ```
 
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
 ## Project Instructions and Rubric
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+### Valid Trajectories
+
+* The car is able to drive at least 4.32 miles without incident.
+  I ran the car 13 minutes for two loops without incident.
+
+* The car drives according to the speed limit.
+  The car starts at 0 mph in its lane (the middle lane) and accelerates up to 49.5 mph. When it is detected too close to its front car, it slows down to avoid incident or change lanes. 
+
+* Max Acceleration and Jerk are not Exceeded.
+  No red sign of exceeding the max acceleration or jerk during the whole driving time.
+
+* Car does not have collisions.
+  No collisions in the whole driving time.
+
+* The car stays in its lane, except for the time between changing lanes.
+  The car changes back to it lane when it is safe to do so after changing to left or right lane for passing.
+
+* The car is able to change lanes.
+  The car is able to change lanes when it is getting too close to its front car, and either left lane or right lane is safe (i.e. not too close) to change into.
 
 
-## Call for IDE Profiles Pull Requests
+### Reflection
 
-Help your fellow students!
+My implementation of the path planning is added in the main.cpp file which was provided by [Udacity's seed project](https://github.com/udacity/CarND-Path-Planning-Project). The trajectory solution is based on the project walk through video from the Udacity course material.
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
+In main.cpp file, source code lines 248 - 456 is my implementation of the path planning.
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+### Prediction - Check other cars positions
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
+Lines 256 - 301 uses telemetry event and sensor fusion data to do calculation and then determine for:
+- if the car in front of my car in my lane is too close to my car
+- if the car in my left lane is too close to my car
+- if the car in my right lane is too close to my car
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
+These boolean results then is used to decide what the driving behavior for my car moving to my next way point.
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
+### Path Planning for Driving Behaviors
 
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
+Lines 304 - 337 describes the path planning of my car's driving behaviors:
+- If my car is getting too close to the car in front of me:
+-- If I am not in the most left lane, and no car in that lane is too close to my car, then change to the left lane; 
+-- Else if I am not in the most right lane, and no car in that lane is too close to my car, then change to the right lane;
+-- Else slow down to avoid collision since it is not safe to change lanes. 
+- If I am not driving in my lane (because of changing lanes for passing), I would change back to my lane if it is safe to do so. If my car's speed is lower than the speed limit, I would speed up at the acceleration limit.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+### Trajactory Calculation
+
+The spline approach is used here in lines 340 - 456. It does the calculation of the trajectory based on the speed and lane output from the behavior, car coordinates and past path points. Coordinates are converted into car space and sampling to create a smooth trajectory.
 
